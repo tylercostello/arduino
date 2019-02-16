@@ -1,0 +1,9 @@
+<?php echo $_POST['age']; 
+$newURL="http://submitthing.000webhostapp.com/";
+$filename = "mytextfile.txt";
+file_put_contents($filename, htmlspecialchars($_POST['age']));
+header('Location: http://submitthing.000webhostapp.com/');
+die();
+
+
+?>
