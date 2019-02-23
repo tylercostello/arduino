@@ -41,8 +41,8 @@ It might not work on all networks!
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
 
-#define WLAN_SSID       "WIFI-NAME"        // cannot be longer than 32 characters!
-#define WLAN_PASS       "WIFI-PASSWORD"
+#define WLAN_SSID       "WIFINAME"        // cannot be longer than 32 characters!
+#define WLAN_PASS       "WIFIPASS"
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
 #define IDLE_TIMEOUT_MS  3000      // Amount of time to wait (in milliseconds) with no data 
@@ -63,13 +63,16 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 /**************************************************************************/
 
 uint32_t ip;
-char payload[]="5";
+char payload[9]={'a','g','e','=','5'};
+//char payload[]="age=5";
 void setup(void)
 {
-  //pinMode(13, OUTPUT);
+  payload[4]='1';
+  payload[5]='1';
+  payload[6]='0';
   Serial.begin(115200);
   Serial.println(F("Hello, CC3000!\n")); 
-
+  Serial.println(payload);
   Serial.print("Free RAM: "); Serial.println(getFreeRam(), DEC);
   
   /* Initialise the module */
@@ -135,10 +138,10 @@ void setup(void)
     www.fastrprint(F("\r\n"));
     www.fastrprint(F("Content-Type: application/x-www-form-urlencoded\r\n"));
     www.fastrprint(F("Content-Length: "));
-    www.fastrprint("5");
+    www.fastrprint("9");
     www.fastrprint(F("\r\n"));
     www.fastrprint(F("\r\n"));
-    www.fastrprint("age=a");
+    www.fastrprint(payload);
     www.println();
     Serial.println(F("Connection Success"));  
   } else {
