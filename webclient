@@ -40,7 +40,7 @@ It might not work on all networks!
 // On an UNO, SCK = 13, MISO = 12, and MOSI = 11
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
-
+#include <stdio.h>
 #define WLAN_SSID       "WIFINAME"        // cannot be longer than 32 characters!
 #define WLAN_PASS       "WIFIPASS"
 #define WLAN_SECURITY   WLAN_SEC_WPA2
@@ -63,18 +63,28 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 /**************************************************************************/
 
 uint32_t ip;
-char payload[9]={'a','g','e','=','5'};
-//char payload[]="age=5";
+char payload[25]={'a','g','e','=','5'};
+
+
+
 void setup(void)
 {
-  payload[4]='1';
-  payload[5]='1';
-  payload[6]='0';
+ 
+int num = 123;
+String str = String(num);
+char cstr[]={16};
+
+str.toCharArray(cstr,16);
+  for(int i=0; i<10;i++){
+    payload[i+4]=cstr[i];
+  }
+  for (int i=26; i>(4+str.length()-1); i=i-1){
+    payload[i]=' ';
+  }
   Serial.begin(115200);
   Serial.println(F("Hello, CC3000!\n")); 
   Serial.println(payload);
   Serial.print("Free RAM: "); Serial.println(getFreeRam(), DEC);
-  
   /* Initialise the module */
   Serial.println(F("\nInitializing..."));
   if (!cc3000.begin())
@@ -138,7 +148,7 @@ void setup(void)
     www.fastrprint(F("\r\n"));
     www.fastrprint(F("Content-Type: application/x-www-form-urlencoded\r\n"));
     www.fastrprint(F("Content-Length: "));
-    www.fastrprint("9");
+    www.fastrprint("28");
     www.fastrprint(F("\r\n"));
     www.fastrprint(F("\r\n"));
     www.fastrprint(payload);
@@ -150,7 +160,7 @@ void setup(void)
   }
 
   Serial.println(F("-------------------------------------"));
-  
+
   /* Read data until either the connection is closed, or the idle timeout is reached. */ 
   unsigned long lastRead = millis();
   while (www.connected() && (millis() - lastRead < IDLE_TIMEOUT_MS)) {
@@ -162,12 +172,12 @@ void setup(void)
   }
   www.close();
   Serial.println(F("-------------------------------------"));
-  
+
   /* You need to make sure to clean up after yourself or the CC3000 can freak out */
   /* the next time your try to connect ... */
   Serial.println(F("\n\nDisconnecting"));
   cc3000.disconnect();
-  
+
 }
 
 void loop(void)
