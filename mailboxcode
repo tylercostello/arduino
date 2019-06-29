@@ -14,8 +14,8 @@
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
 #include <stdio.h>
-#define WLAN_SSID       "2CC-Wireless"        // cannot be longer than 32 characters!
-#define WLAN_PASS       "********"
+#define WLAN_SSID       "*********"        // cannot be longer than 32 characters!
+#define WLAN_PASS       "*********"
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
 #define IDLE_TIMEOUT_MS  3000      // Amount of time to wait (in milliseconds) with no data 
@@ -42,8 +42,10 @@ int photocellReading;     // the analog reading from the sensor divider
 int LEDpin = 11;          // connect Red LED to pin 11 (PWM pin)
 int LEDbrightness; 
 int prevPhotocellReading;
-int state=0;
+int state=1;
 int prevState=0;
+int beforeState;
+bool first=true;
 void setup() {
   // put your setup code here, to run once:
     pinMode(8, INPUT_PULLUP);
@@ -55,26 +57,115 @@ void setup() {
 
 void loop() {
   photocellReading = analogRead(photocellPin);  
- 
+  if (first){
+   prevPhotocellReading = photocellReading;
+   first=false;
+  }
   //Serial.print("Analog reading = ");
      
  
   
   //photocellReading = 1023 - photocellReading;
   Serial.println(photocellReading);  
-  if (abs(photocellReading-prevPhotocellReading)>250){
+  if (abs(photocellReading-prevPhotocellReading)>150){
     state++;
+    //delay(250);
     if (state==5){
       state=1;
     }
   }
   Serial.println(state);
-  if (prevState==2&&state==3){
+  if ((prevState==2&&state==3)||(prevState==4 && state==1)){
     //this is where the sending stuff goes
-//---------------------------------------------------------------------------
-    Serial.println("Sending message");  
+
+    //janky bug fix bc i dont know the cause
+    beforeState=state;
+    writeToWeb();
+    //part 2 of bug fix
+    state=beforeState;
+  }
+  delay(500);
+  if (digitalRead(8) == LOW) {
+      //Button one is pressed!
+      state=1;
+  }
+  if (digitalRead(9) == LOW) {
+      //Button two is pressed!
+      state=1;
+  }
+  prevState=state;
+  prevPhotocellReading=photocellReading;
+  delay(1000);
+}
+
+void listSSIDResults(void)
+{
+  uint32_t index;
+  uint8_t valid, rssi, sec;
+  char ssidname[33]; 
+
+  if (!cc3000.startSSIDscan(&index)) {
+    Serial.println(F("SSID scan failed!"));
+    return;
+  }
+
+  Serial.print(F("Networks found: ")); Serial.println(index);
+  Serial.println(F("================================================"));
+
+  while (index) {
+    index--;
+
+    valid = cc3000.getNextSSID(&rssi, &sec, ssidname);
     
-int num = 1;
+    Serial.print(F("SSID Name    : ")); Serial.print(ssidname);
+    Serial.println();
+    Serial.print(F("RSSI         : "));
+    Serial.println(rssi);
+    Serial.print(F("Security Mode: "));
+    Serial.println(sec);
+    Serial.println();
+  }
+  Serial.println(F("================================================"));
+
+  cc3000.stopSSIDscan();
+}
+
+/**************************************************************************/
+/*!
+    @brief  Tries to read the IP address and other connection details
+*/
+/**************************************************************************/
+bool displayConnectionDetails(void)
+{
+  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
+  
+  if(!cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))
+  {
+    Serial.println(F("Unable to retrieve the IP Address!\r\n"));
+    return false;
+  }
+  else
+  {
+    Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
+    Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
+    Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
+    Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
+    Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
+    Serial.println();
+    return true;
+  }
+}
+void writeToWeb(void){
+  //---------------------------------------------------------------------------
+Serial.println("Sending message");  
+int num=1;
+if (prevState==4&&state==1){    
+num = 0;
+}
+else{
+  num=1;
+}
+
 String str = String(num);
 char cstr[]={16};
 
@@ -127,7 +218,7 @@ str.toCharArray(cstr,16);
     if (! cc3000.getHostByName(WEBSITE, &ip)) {
       Serial.println(F("Couldn't resolve!"));
     }
-    delay(500);
+    delay(1000);
   }
 
   cc3000.printIPdotsRev(ip);
@@ -187,77 +278,4 @@ str.toCharArray(cstr,16);
   cc3000.disconnect();
 //--------------------------------------------
 //end of sending stuff
-    
-  }
- 
-  delay(1000);
-  // put your main code here, to run repeatedly:
-  if (digitalRead(8) == LOW) {
-      //Button one is pressed!
-      state=1;
-  }
-  if (digitalRead(9) == LOW) {
-      //Button two is pressed!
-      state=1;
-  }
-  prevState=state;
-  prevPhotocellReading=photocellReading;
-}
-
-void listSSIDResults(void)
-{
-  uint32_t index;
-  uint8_t valid, rssi, sec;
-  char ssidname[33]; 
-
-  if (!cc3000.startSSIDscan(&index)) {
-    Serial.println(F("SSID scan failed!"));
-    return;
-  }
-
-  Serial.print(F("Networks found: ")); Serial.println(index);
-  Serial.println(F("================================================"));
-
-  while (index) {
-    index--;
-
-    valid = cc3000.getNextSSID(&rssi, &sec, ssidname);
-    
-    Serial.print(F("SSID Name    : ")); Serial.print(ssidname);
-    Serial.println();
-    Serial.print(F("RSSI         : "));
-    Serial.println(rssi);
-    Serial.print(F("Security Mode: "));
-    Serial.println(sec);
-    Serial.println();
-  }
-  Serial.println(F("================================================"));
-
-  cc3000.stopSSIDscan();
-}
-
-/**************************************************************************/
-/*!
-    @brief  Tries to read the IP address and other connection details
-*/
-/**************************************************************************/
-bool displayConnectionDetails(void)
-{
-  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
-  
-  if(!cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))
-  {
-    Serial.println(F("Unable to retrieve the IP Address!\r\n"));
-    return false;
-  }
-  else
-  {
-    Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
-    Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
-    Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
-    Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
-    Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
-    Serial.println();
-    return true;
-  }
 }
