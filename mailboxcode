@@ -15,7 +15,7 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
                                          SPI_CLOCK_DIVIDER); // you can change this clock speed
 #include <stdio.h>
 #define WLAN_SSID       "2CC-Wireless"        // cannot be longer than 32 characters!
-#define WLAN_PASS       "a9b8c7d6e5"
+#define WLAN_PASS       "********"
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
 #define IDLE_TIMEOUT_MS  3000      // Amount of time to wait (in milliseconds) with no data 
