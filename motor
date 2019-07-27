@@ -1,0 +1,38 @@
+
+  int EN_A = 9;      //Enable pin for first motor
+  int IN1 = 6;       //control pin for first motor
+  int IN2 = 7;       //control pin for first motor
+  int IN3 = 5;        //control pin for second motor
+  int IN4 = 4;        //control pin for second motor
+  int EN_B = 3;  
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(EN_A, OUTPUT);
+  pinMode(IN1, OUTPUT);  
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);  
+  pinMode(IN4, OUTPUT);
+  pinMode(EN_B, OUTPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  // set speed to 150 out 255
+  analogWrite(EN_A, 200);
+  // turn on motor B
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  // set speed to 150 out 255
+  analogWrite(EN_B, 200);
+  delay(2000);
+  // now turn off motors
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);  
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  delay(2000);
+  
+}
