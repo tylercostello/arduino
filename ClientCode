@@ -13,6 +13,19 @@
 
 RF24 radio(8, 10); // CE, CSN
 
+  int EN_A = 9;      //Enable pin for first motor
+  int IN1 = 6;       //control pin for first motor
+  int IN2 = 7;       //control pin for first motor
+  int IN3 = 5;        //control pin for second motor
+  int IN4 = 4;        //control pin for second motor
+  int EN_B = 3;  
+  int x;
+  int y;
+  int point;
+  boolean gate=false;
+  String textStr;
+  int mailLength;
+  String tempString;
 const byte address[6] = "00001";
 
 void setup() {
@@ -21,13 +34,65 @@ void setup() {
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
+    pinMode(EN_A, OUTPUT);
+  pinMode(IN1, OUTPUT);  
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);  
+  pinMode(IN4, OUTPUT);
+  pinMode(EN_B, OUTPUT);
 }
 
 void loop() {
   if (radio.available()) {
     char text[32] = "";
     radio.read(&text, sizeof(text));
-    Serial.println(text);
+    //Serial.println(text);
+    textStr=String(text);
+    mailLength=int(textStr.length());
+    for(int i=0;i<mailLength;i++){
+      
+      if(text[i]!='&'){
+        tempString=tempString+text[i];
+      }
+      else{
+        point=i;
+        i=mailLength;
+      }
+    }
+    x=tempString.toInt();
+    tempString="";
+    for(int i=point+1;i<mailLength;i++){
+      tempString=tempString+text[i];
+      }
+    
+    y=tempString.toInt();
+    tempString="";
+    Serial.print("x ");
+    Serial.println(x);
+    Serial.print("y ");
+    Serial.println(y);
+    if (y<400){
+      //Serial.println("1");
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      analogWrite(EN_A, 200);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+    }
+    else if (y>600){
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      analogWrite(EN_B, 200);
+    }
+    else {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+    }
   }
-  delay(500);
+  
+  delay(250);
 }
