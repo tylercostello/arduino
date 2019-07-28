@@ -38,5 +38,5 @@ void loop() {
   char text[10]={};
   mail.toCharArray(text,10);
   radio.write(&text, sizeof(text));
-  delay(1000);
+  delay(500);
 }
