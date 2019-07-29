@@ -71,19 +71,37 @@ void loop() {
     Serial.println(x);
     Serial.print("y ");
     Serial.println(y);
-    if (y<400){
+    if (y<400&&x>100&&x<900){
       //Serial.println("1");
       digitalWrite(IN1, HIGH);
       digitalWrite(IN2, LOW);
       analogWrite(EN_A, 200);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, LOW);
-    }
-    else if (y>600){
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, LOW);
       digitalWrite(IN3, HIGH);
       digitalWrite(IN4, LOW);
+      analogWrite(EN_B, 200);
+    }
+    else if (y>600&&x>100&&x<900){
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      analogWrite(EN_A, 200);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      analogWrite(EN_B, 200);
+    }
+      else if (x<100&&y>100&&y<900){
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      analogWrite(EN_A, 200);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      analogWrite(EN_B, 200);
+    }
+    else if (x>900&&y>100&&y<900){
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      analogWrite(EN_A, 200);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
       analogWrite(EN_B, 200);
     }
     else {
